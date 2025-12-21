@@ -1,4 +1,4 @@
-# Keywordify
+# Keywordify v1.0
 
 **Contextual keyword extraction and PDF annotation using AI**
 
@@ -140,8 +140,7 @@ keywords = extractor.extract_keywords(text, min_keywords=2, max_keywords=7)
 
 Edit `src/pdf_generator.py`:
 ```python
-HIGHLIGHT_COLOR = HexColor('#00FF00')  # Green instead of yellow
-```
+HIGHLIGHT_COLOR = HexColor('#0011ff8a')  # blue
 
 ### Adjust Margins
 
@@ -189,10 +188,9 @@ MIT
 
 ## Author
 
-Cristian - AI/ML Engineer specializing in PropTech applications
+Cristian Perera - AI/ML Engineer specializing in PropTech applications
 
 ## Acknowledgments
 
-- Built with [Anthropic Claude](https://www.anthropic.com/)
 - PDF generation via [ReportLab](https://www.reportlab.com/)
 - Document parsing via [python-docx](https://python-docx.readthedocs.io/)
