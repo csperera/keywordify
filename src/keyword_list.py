@@ -1,5 +1,6 @@
 """
 Generate a 3-column keyword list in order of appearance.
+Supports multiple pages when there are many keywords.
 """
 
 from reportlab.lib.pagesizes import letter
@@ -23,7 +24,7 @@ class KeywordListGenerator:
     
     def generate(self, keywords: List[str]):
         """
-        Generate 3-column keyword list.
+        Generate 3-column keyword list with multi-page support.
         
         Args:
             keywords: List of keywords in order of appearance
@@ -35,44 +36,60 @@ class KeywordListGenerator:
         column_width = (total_content_width - (2 * self.COLUMN_GAP)) / 3
         
         # Column X positions
-        col1_x = self.MARGIN
-        col2_x = self.MARGIN + column_width + self.COLUMN_GAP
-        col3_x = self.MARGIN + (2 * column_width) + (2 * self.COLUMN_GAP)
+        col_x = [
+            self.MARGIN,
+            self.MARGIN + column_width + self.COLUMN_GAP,
+            self.MARGIN + (2 * column_width) + (2 * self.COLUMN_GAP)
+        ]
         
         # Maximum rows per column (based on page height)
-        # Conservative estimate: ~30 rows per column
-        max_rows_per_column = 30
-        
-        # Title
-        c.setFont("Helvetica-Bold", 14)
-        c.drawString(self.MARGIN, self.PAGE_HEIGHT - self.MARGIN, "Keywords (in order of appearance)")
-        
-        # Starting Y position for keywords
-        y_start = self.PAGE_HEIGHT - self.MARGIN - 0.5 * inch
         line_height = 0.25 * inch
+        y_start = self.PAGE_HEIGHT - self.MARGIN - 0.5 * inch
+        y_end = self.MARGIN
+        max_rows_per_column = int((y_start - y_end) / line_height)
+        keywords_per_page = max_rows_per_column * 3
         
-        c.setFont("Helvetica", 11)
+        # Calculate total pages needed
+        total_pages = math.ceil(len(keywords) / keywords_per_page) if keywords else 1
         
-        # Fill columns sequentially: fill column 1 completely, then column 2, then column 3
-        for idx, keyword in enumerate(keywords):
-            # Determine which column this keyword goes in
-            if idx < max_rows_per_column:
-                # Column 1
-                x = col1_x
-                row = idx
-            elif idx < 2 * max_rows_per_column:
-                # Column 2
-                x = col2_x
-                row = idx - max_rows_per_column
+        keyword_idx = 0
+        
+        for page_num in range(1, total_pages + 1):
+            # Title with page number
+            c.setFont("Helvetica-Bold", 14)
+            if total_pages > 1:
+                title = f"Keywords (in order of appearance) - Page {page_num} of {total_pages}"
             else:
-                # Column 3
-                x = col3_x
-                row = idx - (2 * max_rows_per_column)
+                title = "Keywords (in order of appearance)"
+            c.drawString(self.MARGIN, self.PAGE_HEIGHT - self.MARGIN, title)
             
-            y = y_start - (row * line_height)
+            # Set font for keywords
+            c.setFont("Helvetica", 11)
             
-            # Draw keyword with bullet
-            c.drawString(x, y, f"• {keyword}")
+            # Fill columns for this page
+            for col in range(3):
+                for row in range(max_rows_per_column):
+                    if keyword_idx >= len(keywords):
+                        break
+                    
+                    x = col_x[col]
+                    y = y_start - (row * line_height)
+                    
+                    keyword = keywords[keyword_idx]
+                    # Truncate long keywords to fit in column
+                    display_text = f"• {keyword}"
+                    if len(display_text) > 35:
+                        display_text = display_text[:32] + "..."
+                    
+                    c.drawString(x, y, display_text)
+                    keyword_idx += 1
+                
+                if keyword_idx >= len(keywords):
+                    break
+            
+            # Add new page if there are more keywords
+            if keyword_idx < len(keywords):
+                c.showPage()
         
         c.save()
         print(f"Keyword list generated: {self.output_path}")

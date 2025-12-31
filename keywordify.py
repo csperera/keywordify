@@ -63,30 +63,29 @@ class Keywordify:
         para_count = reader.get_paragraph_count(input_docx)
         print(f"  ✓ Extracted {len(text)} characters from {para_count} paragraphs")
         
-        # Step 2: Extract keywords using GPT
-        print("\nStep 2: Extracting keywords with GPT...")
+        # Step 2: Initialize keyword extractor
+        print("\nStep 2: Initializing keyword extractor...")
         extractor = KeywordExtractor(api_key=self.api_key)
-        keywords = extractor.extract_keywords(text, min_keywords=3, max_keywords=5)
-        print(f"  ✓ Extracted {len(keywords)} keywords:")
-        for i, kw in enumerate(keywords, 1):
-            print(f"    {i}. {kw}")
+        print("  ✓ Extractor ready (will extract 5-10 keywords per page)")
         
-        # Step 3: Generate annotated PDF
-        print("\nStep 3: Generating annotated PDF...")
-        pdf_gen = AnnotatedPDFGenerator(annotated_pdf)
-        pdf_gen.generate(text, keywords)
+        # Step 3: Generate annotated PDF with per-page keyword extraction
+        print("\nStep 3: Generating annotated PDF with per-page keywords...")
+        pdf_gen = AnnotatedPDFGenerator(annotated_pdf, keyword_extractor=extractor)
+        all_keywords = pdf_gen.generate(text)
         print(f"  ✓ Created: {annotated_pdf}")
+        print(f"  ✓ Total unique keywords extracted: {len(all_keywords)}")
         
-        # Step 4: Generate keyword list PDF
+        # Step 4: Generate keyword list PDF with all keywords from all pages
         print("\nStep 4: Generating keyword list PDF...")
         list_gen = KeywordListGenerator(keyword_list_pdf)
-        list_gen.generate(keywords)
+        list_gen.generate(all_keywords)
         print(f"  ✓ Created: {keyword_list_pdf}")
         
         print("\n" + "=" * 60)
         print("✓ Processing complete!")
         print(f"  • Annotated PDF: {annotated_pdf}")
         print(f"  • Keyword List:  {keyword_list_pdf}")
+        print(f"  • Keywords found: {len(all_keywords)}")
         print("=" * 60)
         
         return annotated_pdf, keyword_list_pdf

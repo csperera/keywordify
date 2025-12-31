@@ -182,7 +182,7 @@ keywords = extractor.extract_keywords(text, min_keywords=2, max_keywords=7)
 ### Change Highlight Color
 Edit `src/pdf_generator.py`:
 ```python
-HIGHLIGHT_COLOR = HexColor('#00FF00')  # Green
+HIGHLIGHT_COLOR = HexColor('#0026ffff')  # Green
 ```
 
 ### Adjust Margins
